@@ -1,0 +1,39 @@
+services:
+  # 1. LA BASE DE DATOS
+  db:
+    image: mariadb:10.11
+    container_name: codemized_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: task_manager_db
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: dev_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # 2. EL BACKEND (FastAPI)
+  backend:
+    build: ./backend
+    container_name: codemized_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: mysql+pymysql://dev_user:dev_password@db:3306/task_manager_db
+
+  # 3. EL FRONTEND (Next.js)
+  frontend:
+    build: ./frontend
+    container_name: codemized_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+# ESTO ES LO QUE LE FALTABA A DOCKER:
+volumes:
+  db_data:

@@ -1,0 +1,38 @@
+# =========================
+# BACKEND (Python / FastAPI)
+# =========================
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variables de entorno (¡La regla de oro!)
+.env
+
+# =========================
+# FRONTEND (Node / Next.js)
+# =========================
+# Dependencias pesadas
+node_modules/
+
+# Builds de Next.js
+.next/
+out/
+build/
+
+# Variables de entorno de Node
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# =========================
+# SISTEMA OPERATIVO
+# =========================
+.DS_Store
+Thumbs.db
