@@ -33,7 +33,7 @@ export default function Home() {
           setUsername(userData.alias);
         }
 
-        const resProj = await fetch("http://localhost:8000/projects/", {
+        const resProj = await fetch("http://localhost:8000/projects/my-projects", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
