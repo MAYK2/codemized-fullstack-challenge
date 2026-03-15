@@ -73,9 +73,13 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
         setTitle("");
         setDescription("");
         setAssigneeId("");
+      } else {
+        const errorData = await response.json();
+        alert(errorData.detail || "Error al crear la tarea. Verifica tus permisos.");
       }
     } catch (error) {
       console.error("Error:", error);
+      alert("Error de conexión al intentar crear la tarea.");
     }
   };
 

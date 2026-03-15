@@ -16,6 +16,9 @@ class ProjectRepository:
 
     def get_projects(self, db: Session, skip: int = 0, limit: int = 100):
         return db.query(models.Project).offset(skip).limit(limit).all()
+
+    def get_project_by_id(self, db: Session, project_id: int):
+        return db.query(models.Project).filter(models.Project.id == project_id).first()
         
     def get_projects_by_user(self, db: Session, user_id: int, skip: int = 0, limit: int = 100):
         return db.query(models.Project).filter(models.Project.creator_id == user_id).offset(skip).limit(limit).all()
