@@ -30,6 +30,7 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
       try {
         const response = await fetch(`http://localhost:8000/tasks/project/${projectId}`, {
           headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
         });
 
         if (response.ok) {
