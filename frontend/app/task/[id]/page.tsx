@@ -17,17 +17,16 @@ export default function TaskDetailsPage({ params: paramsPromise }: { params: Pro
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     const fetchComments = async () => {
       try {
         const response = await fetch(`http://localhost:8000/comments/task/${taskId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include", // envía la httpOnly cookie automáticamente
         });
+
+        if (response.status === 401) {
+          router.push("/login");
+          return;
+        }
 
         if (response.ok) {
           const data = await response.json();
@@ -47,14 +46,11 @@ export default function TaskDetailsPage({ params: paramsPromise }: { params: Pro
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const token = localStorage.getItem("token");
     try {
       const response = await fetch("http://localhost:8000/comments/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           content: newComment,
           task_id: parseInt(taskId as string),

@@ -25,12 +25,12 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData,
+        credentials: "include", // necesario para que el navegador reciba y guarde la cookie
       });
 
       if (!response.ok) throw new Error("Credenciales inválidas");
 
-      const data = await response.json();
-      localStorage.setItem("token", data.access_token);
+      // No guardamos el token — el backend lo setea como httpOnly cookie
       router.push("/");
     } catch (err: any) {
       setError(err.message);

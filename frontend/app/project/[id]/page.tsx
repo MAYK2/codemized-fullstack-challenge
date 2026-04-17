@@ -26,18 +26,17 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     const fetchTasks = async () => {
       try {
         const response = await fetch(`http://localhost:8000/tasks/project/${projectId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include", // envía la httpOnly cookie automáticamente
           cache: "no-store",
         });
+
+        if (response.status === 401) {
+          router.push("/login");
+          return;
+        }
 
         if (response.ok) {
           const data = await response.json();
@@ -57,14 +56,11 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
     e.preventDefault();
     if (!title.trim()) return;
 
-    const token = localStorage.getItem("token");
     try {
       const response = await fetch("http://localhost:8000/tasks/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           title,
           description,

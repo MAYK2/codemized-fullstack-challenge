@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -17,31 +17,29 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     const fetchData = async () => {
       try {
+        // Verificar sesión — si la cookie no existe, el backend responderá 401
         const resUser = await fetch("http://localhost:8000/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include", // envía la httpOnly cookie automáticamente
         });
-        if (resUser.ok) {
-          const userData = await resUser.json();
-          setUsername(userData.alias);
+
+        if (!resUser.ok) {
+          router.push("/login");
+          return;
         }
 
+        const userData = await resUser.json();
+        setUsername(userData.alias);
+
         const resProj = await fetch("http://localhost:8000/projects/my-projects", {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
 
         if (resProj.ok) {
           const data = await resProj.json();
           setProjects(data);
         } else if (resProj.status === 401) {
-          localStorage.removeItem("token");
           router.push("/login");
         }
       } catch (error) {
@@ -54,23 +52,23 @@ export default function Home() {
     fetchData();
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    await fetch("http://localhost:8000/logout", {
+      method: "POST",
+      credentials: "include", // envía la cookie para que el backend la borre
+    });
     router.push("/login");
   };
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
     if(!title.trim() || !description.trim()) return;
 
     try {
       const response = await fetch("http://localhost:8000/projects/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ title, description }),
       });
 

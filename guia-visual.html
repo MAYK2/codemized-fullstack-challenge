@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía Técnica — Challenge Junior Full Stack</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0f17;
+      --card: #13161f;
+      --card2: #1a1e2e;
+      --border: #2a2f45;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --accent3: #ff6b6b;
+      --accent4: #ffd166;
+      --text: #e8eaf0;
+      --muted: #8892a4;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff; color: #111; }
+      .hero { background: linear-gradient(135deg,#6c63ff,#00d4aa) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card, .diagram-box, .layer-box, .step-card { background: #f5f5f5 !important; border: 1px solid #ccc !important; color: #111 !important; }
+      .section-title, .step-num, .layer-icon, .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page-break { page-break-before: always; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1040 0%, #0d1535 40%, #0a2040 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 40px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,.35) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108,99,255,.2);
+      border: 1px solid rgba(108,99,255,.4);
+      border-radius: 999px;
+      padding: 6px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a99dff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      background: linear-gradient(90deg, #fff 0%, #a99dff 60%, #00d4aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 16px;
+      margin-top: 14px;
+      position: relative;
+    }
+    .stack-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 28px;
+      position: relative;
+    }
+    .pill {
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .pill.purple { border-color: rgba(108,99,255,.5); color: #a99dff; }
+    .pill.teal   { border-color: rgba(0,212,170,.5); color: #00d4aa; }
+    .pill.red    { border-color: rgba(255,107,107,.5); color: #ff9999; }
+    .pill.yellow { border-color: rgba(255,209,102,.5); color: #ffd166; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* ── SECTION ── */
+    .section { margin-top: 56px; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .section-num {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #9d95ff);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    /* ── ARQUITECTURA STACKED ── */
+    .arch-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .arch-layer {
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+      border: 1px solid;
+    }
+    .arch-layer.browser { background: rgba(108,99,255,.08); border-color: rgba(108,99,255,.35); }
+    .arch-layer.frontend { background: rgba(0,212,170,.08); border-color: rgba(0,212,170,.35); }
+    .arch-layer.backend { background: rgba(255,209,102,.08); border-color: rgba(255,209,102,.35); }
+    .arch-layer.db { background: rgba(255,107,107,.08); border-color: rgba(255,107,107,.35); }
+
+    .arch-layer-title { font-weight: 700; font-size: 15px; }
+    .arch-layer.browser .arch-layer-title { color: #a99dff; }
+    .arch-layer.frontend .arch-layer-title { color: #00d4aa; }
+    .arch-layer.backend .arch-layer-title { color: #ffd166; }
+    .arch-layer.db .arch-layer-title { color: #ff9999; }
+
+    .arch-layer p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .arch-arrow {
+      text-align: center;
+      padding: 6px 0;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .arch-arrow::before, .arch-arrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── DATA MODEL ── */
+    .entity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .entity-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .entity-box h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .entity-box .field {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      padding: 3px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .field .pk { color: #ffd166; font-size: 10px; }
+    .field .fk { color: #ff9999; font-size: 10px; }
+    .field .val { color: var(--text); }
+    .entity-box.users h4 { color: #a99dff; }
+    .entity-box.projects h4 { color: #00d4aa; }
+    .entity-box.tasks h4 { color: #ffd166; }
+    .entity-box.comments h4 { color: #ff9999; }
+
+    .rel-diagram {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 2;
+    }
+    .rel-diagram .hl { color: #a99dff; }
+    .rel-diagram .hl2 { color: #00d4aa; }
+    .rel-diagram .hl3 { color: #ffd166; }
+    .rel-diagram .hl4 { color: #ff9999; }
+
+    /* ── BACKEND LAYERS ── */
+    .layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .layer-box {
+      padding: 20px 24px;
+      border: 1px solid;
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .layer-box.ctrl  { background: rgba(108,99,255,.1); border-color: rgba(108,99,255,.4); }
+    .layer-box.svc   { background: rgba(0,212,170,.08); border-color: rgba(0,212,170,.4); }
+    .layer-box.repo  { background: rgba(255,107,107,.08); border-color: rgba(255,107,107,.35); }
+    .layer-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .ctrl .layer-icon { background: rgba(108,99,255,.2); }
+    .svc  .layer-icon { background: rgba(0,212,170,.2); }
+    .repo .layer-icon { background: rgba(255,107,107,.2); }
+    .layer-content h4 { font-weight: 700; font-size: 15px; color: #fff; }
+    .layer-content p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .layer-arrow {
+      text-align: center;
+      color: var(--muted);
+      padding: 8px;
+      font-size: 22px;
+    }
+
+    /* ── JWT FLOW ── */
+    .jwt-steps {
+      counter-reset: jwt;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .jwt-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .jwt-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #9d95ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .jwt-step .content { flex: 1; }
+    .jwt-step .content strong { color: #fff; font-size: 14px; display: block; }
+    .jwt-step .content span  { color: var(--muted); font-size: 13px; }
+    .jwt-token-viz {
+      display: flex;
+      gap: 4px;
+      margin-top: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      flex-wrap: wrap;
+    }
+    .tok-part {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .tok-part.h { background: rgba(108,99,255,.2); color: #a99dff; }
+    .tok-part.p { background: rgba(0,212,170,.2); color: #00d4aa; }
+    .tok-part.s { background: rgba(255,107,107,.2); color: #ff9999; }
+    .tok-dot { color: var(--muted); display: flex; align-items: center; }
+
+    /* ── FULL FLOW STEPS ── */
+    .flow-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .step-card {
+      display: flex;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      position: relative;
+    }
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .step-content { flex: 1; }
+    .step-content strong { color: #fff; display: block; font-size: 14px; margin-bottom: 4px; }
+    .step-content p { color: var(--muted); font-size: 13px; }
+    .step-connector {
+      width: 2px;
+      background: var(--border);
+      height: 20px;
+      margin-left: 37px;
+    }
+
+    /* ── QA CARDS ── */
+    .qa-list { display: flex; flex-direction: column; gap: 16px; }
+    .qa-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .qa-question {
+      padding: 14px 20px;
+      background: rgba(108,99,255,.1);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 14px;
+      color: #a99dff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .qa-answer {
+      padding: 16px 20px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .qa-answer strong { color: var(--text); }
+
+    /* ── FILE TREE ── */
+    .tree {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 2;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .tree .dir { color: #a99dff; font-weight: 600; }
+    .tree .file { color: var(--muted); }
+    .tree .comment { color: #3d4a5c; }
+    .tree .highlight { color: #00d4aa; }
+
+    /* ── GRID 2 ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* ── CODE ── */
+    .code-block {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+    .code-block .kw { color: #c792ea; }
+    .code-block .fn { color: #82aaff; }
+    .code-block .str { color: #c3e88d; }
+    .code-block .cmt { color: #546e7a; }
+    .code-block .num { color: #f78c6c; }
+
+    /* ── TIPS ── */
+    .tip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .tip-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .tip-card .tip-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: rgba(108,99,255,.3);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .tip-card strong { color: #fff; font-size: 14px; display: block; margin-bottom: 6px; }
+    .tip-card p { font-size: 13px; color: var(--muted); }
+
+    /* ── VOCAB ── */
+    .vocab-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .vocab-tag {
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.3);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #a99dff;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 48px 0;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+    .footer strong { color: var(--accent2); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ HERO -->
+<div class="hero">
+  <div class="hero-badge">🎯 Entrevista Técnica</div>
+  <h1>Challenge Junior Full Stack</h1>
+  <p>Guía completa · FastAPI · Next.js · MariaDB · Docker · JWT</p>
+  <div class="stack-pills">
+    <span class="pill purple">FastAPI</span>
+    <span class="pill teal">Next.js 15</span>
+    <span class="pill red">MariaDB</span>
+    <span class="pill yellow">Docker</span>
+    <span class="pill purple">JWT · bcrypt</span>
+    <span class="pill teal">SQLAlchemy</span>
+    <span class="pill yellow">Pydantic</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════ 1. ARQUITECTURA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">🗺️ Arquitectura General</div>
+        <div class="section-subtitle">El "mapa" del sistema — 3 capas independientes en contenedores Docker</div>
+      </div>
+    </div>
+
+    <div class="arch-stack">
+      <div class="arch-layer browser">
+        <div class="arch-layer-title">🌐 USUARIO (Browser)</div>
+        <p>Abre <strong>http://localhost:3000</strong> — interpreta HTML/CSS/JS, ejecuta React</p>
+      </div>
+      <div class="arch-arrow">↕ HTTP fetch (desde JavaScript)</div>
+      <div class="arch-layer frontend">
+        <div class="arch-layer-title">⚛️ FRONTEND — Next.js 15 <span style="font-weight:400;font-size:13px;color:#8892a4">Puerto 3000</span></div>
+        <p>Interfaz de usuario · Formularios · Navegación · Route Guards · localStorage</p>
+      </div>
+      <div class="arch-arrow">↕ HTTP/REST JSON + JWT Bearer Token</div>
+      <div class="arch-layer backend">
+        <div class="arch-layer-title">⚙️ BACKEND — FastAPI / Python <span style="font-weight:400;font-size:13px;color:#8892a4">Puerto 8000</span></div>
+        <p>API REST · Lógica de negocio · Autenticación JWT · Validación Pydantic · Swagger /docs</p>
+      </div>
+      <div class="arch-arrow">↕ SQL (ORM SQLAlchemy)</div>
+      <div class="arch-layer db">
+        <div class="arch-layer-title">🗄️ BASE DE DATOS — MariaDB <span style="font-weight:400;font-size:13px;color:#8892a4">Puerto 3306</span></div>
+        <p>Persistencia de datos · Tablas: users, projects, tasks, comments · Foreign Keys · Cascade</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px; border-color: rgba(108,99,255,.3);">
+      <div class="card-title">🐳 Docker Compose — Orquestación</div>
+      <p style="font-size:13px; color:var(--muted);">Los tres servicios corren en <strong style="color:#a99dff;">contenedores separados</strong> bajo la misma red interna <code style="background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px; font-size:11px;">app_network</code>. El backend espera que MariaDB esté <strong style="color:#00d4aa;">HEALTHY</strong> antes de arrancar (healthcheck).</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 2. MODELO DE DATOS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">🗃️ Modelo de Datos</div>
+        <div class="section-subtitle">4 entidades con relaciones bien definidas</div>
+      </div>
+    </div>
+
+    <div class="entity-grid">
+      <div class="entity-box users">
+        <h4>👤 users</h4>
+        <div class="field"><span class="pk">PK</span><span class="val">id</span></div>
+        <div class="field"><span class="val">email</span></div>
+        <div class="field"><span class="val">alias</span></div>
+        <div class="field"><span class="val">hashed_password</span></div>
+      </div>
+      <div class="entity-box projects">
+        <h4>📁 projects</h4>
+        <div class="field"><span class="pk">PK</span><span class="val">id</span></div>
+        <div class="field"><span class="val">title</span></div>
+        <div class="field"><span class="val">description</span></div>
+        <div class="field"><span class="fk">FK</span><span class="val">creator_id → users</span></div>
+      </div>
+      <div class="entity-box tasks">
+        <h4>✅ tasks</h4>
+        <div class="field"><span class="pk">PK</span><span class="val">id</span></div>
+        <div class="field"><span class="val">title · description</span></div>
+        <div class="field"><span class="val">status</span></div>
+        <div class="field"><span class="fk">FK</span><span class="val">project_id → projects</span></div>
+        <div class="field"><span class="fk">FK</span><span class="val">assignee_id → users</span></div>
+      </div>
+      <div class="entity-box comments">
+        <h4>💬 comments</h4>
+        <div class="field"><span class="pk">PK</span><span class="val">id</span></div>
+        <div class="field"><span class="val">content</span></div>
+        <div class="field"><span class="fk">FK</span><span class="val">task_id → tasks</span></div>
+        <div class="field"><span class="fk">FK</span><span class="val">author_id → users</span></div>
+      </div>
+    </div>
+
+    <div class="rel-diagram">
+<span class="hl">User</span> ──── crea ────────────► <span class="hl2">Project</span>
+ │                                   │
+ │                              contiene (cascade delete)
+ │                                   │
+ └─── es asignado a ──────► <span class="hl3">Task</span> ◄── pertenece a ── <span class="hl2">Project</span>
+                              │
+                         tiene (cascade delete)
+                              │
+                          <span class="hl4">Comment</span> ◄──── escrito por ──── <span class="hl">User</span>
+    </div>
+
+    <div class="card" style="margin-top:16px; border-left: 3px solid #ffd166;">
+      <div class="card-title">💡 cascade="all, delete-orphan"</div>
+      <p style="font-size:13px; color:var(--muted);">Si eliminás un <strong>proyecto</strong> → sus <strong>tareas</strong> se eliminan automáticamente. Si eliminás una <strong>tarea</strong> → sus <strong>comentarios</strong> también. Limpieza automática sin escribir lógica extra.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 3. CAPAS BACKEND -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">🏛️ Arquitectura en Capas del Backend</div>
+        <div class="section-subtitle">Separación de responsabilidades — Single Responsibility Principle</div>
+      </div>
+    </div>
+
+    <div class="layer-stack">
+      <div class="arch-arrow" style="justify-content:flex-start; padding-left:52px; gap:8px;">
+        <span style="color: #a99dff;">&#11015; HTTP Request entrante</span>
+      </div>
+      <div class="layer-box ctrl">
+        <div class="layer-icon">🎛️</div>
+        <div class="layer-content">
+          <h4>CONTROLLER — Capa de Entrada</h4>
+          <p><code style="font-size:11px;">/controllers/task_controller.py</code><br>
+          Solo maneja <strong>rutas HTTP</strong>. Valida el token JWT. Delega al service. <strong>Nada más.</strong><br>
+          <em style="color:#546e7a; font-size:12px;">Cambia si cambia el protocolo HTTP.</em></p>
+        </div>
+      </div>
+      <div class="layer-arrow">⬇</div>
+      <div class="layer-box svc">
+        <div class="layer-icon">🧠</div>
+        <div class="layer-content">
+          <h4>SERVICE — Capa de Negocio</h4>
+          <p><code style="font-size:11px;">/services/task_service.py</code><br>
+          Aquí vive la <strong>lógica real</strong>: "¿puede este user crear esta tarea?" · "¿el proyecto le pertenece?" · Reglas de negocio.<br>
+          <em style="color:#546e7a; font-size:12px;">Cambia si cambian las reglas de negocio.</em></p>
+        </div>
+      </div>
+      <div class="layer-arrow">⬇</div>
+      <div class="layer-box repo">
+        <div class="layer-icon">🗄️</div>
+        <div class="layer-content">
+          <h4>REPOSITORY — Capa de Datos</h4>
+          <p><code style="font-size:11px;">/repositories/task_repository.py</code><br>
+          Solo <strong>habla con la DB</strong>. Consultas SQL via SQLAlchemy. No sabe nada de HTTP ni de reglas.<br>
+          <em style="color:#546e7a; font-size:12px;">Cambia si cambia la fuente de datos.</em></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px; border-left: 3px solid #6c63ff;">
+      <div class="card-title">🎤 Frase para la entrevista</div>
+      <p style="font-size:13px; color:var(--muted); font-style:italic;">"Separé en capas para respetar el principio de <strong style="color:#a99dff;">Single Responsibility</strong>: cada clase tiene una sola razón para cambiar. Si mañana cambio de SQL a NoSQL, solo toco el repository. El service y el controller no saben (ni les importa) qué motor de base de datos está abajo."</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 4. JWT -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">🔐 Autenticación — JWT</div>
+        <div class="section-subtitle">JSON Web Tokens · Stateless · bcrypt</div>
+      </div>
+    </div>
+
+    <div class="jwt-steps">
+      <div class="jwt-step">
+        <div class="jwt-num">1</div>
+        <div class="content">
+          <strong>Usuario en /login introduce email + password</strong>
+          <span>El frontend muestra el formulario de login</span>
+        </div>
+      </div>
+      <div class="jwt-step">
+        <div class="jwt-num">2</div>
+        <div class="content">
+          <strong>POST /login con form-data (OAuth2 standard)</strong>
+          <span>El frontend envía las credenciales al backend</span>
+        </div>
+      </div>
+      <div class="jwt-step">
+        <div class="jwt-num">3</div>
+        <div class="content">
+          <strong>Backend verifica password con bcrypt</strong>
+          <span>Busca el user en la DB · Compara hash · nunca texto plano</span>
+        </div>
+      </div>
+      <div class="jwt-step">
+        <div class="jwt-num">4</div>
+        <div class="content">
+          <strong>Genera JWT firmado con SECRET_KEY</strong>
+          <span>Payload: <code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">{"sub": "1", "exp": 1717200000}</code> — el "sub" es el user ID</span>
+        </div>
+      </div>
+      <div class="jwt-step">
+        <div class="jwt-num">5</div>
+        <div class="content">
+          <strong>Frontend guarda el token en localStorage</strong>
+          <span>Recibe <code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">{"access_token": "eyJ..."}</code> y lo persiste</span>
+        </div>
+      </div>
+      <div class="jwt-step">
+        <div class="jwt-num">6</div>
+        <div class="content">
+          <strong>Cada request lleva el token en el header</strong>
+          <span><code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">Authorization: Bearer eyJ...</code></span>
+        </div>
+      </div>
+      <div class="jwt-step">
+        <div class="jwt-num">7</div>
+        <div class="content">
+          <strong>Backend decodifica → extrae user_id → sabe quién es</strong>
+          <span>Sin consultar la DB · Stateless · Cualquier instancia puede validar</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">🔍 Estructura de un JWT</div>
+      <div class="jwt-token-viz">
+        <div class="tok-part h">eyJhbGciOiJIUzI1NiJ9<br><small>HEADER (algoritmo)</small></div>
+        <div class="tok-dot">.</div>
+        <div class="tok-part p">eyJzdWIiOiIxIn0<br><small>PAYLOAD (user ID)</small></div>
+        <div class="tok-dot">.</div>
+        <div class="tok-part s">firma_hash_con_SECRET_KEY<br><small>SIGNATURE (integridad)</small></div>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-top:14px;">El header y payload son <strong>solo Base64</strong> (cualquiera los lee). La <strong style="color:#ff9999;">firma</strong> garantiza que nadie los modificó, porque solo el servidor tiene el <code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">SECRET_KEY</code>.</p>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card" style="border-left:3px solid #00d4aa;">
+        <div class="card-title">✅ Stateless (JWT)</div>
+        <p style="font-size:13px; color:var(--muted);">El servidor <strong style="color:#00d4aa;">NO guarda nada en memoria</strong>. Cualquier instancia puede validar cualquier token. Escalable horizontalmente.</p>
+      </div>
+      <div class="card" style="border-left:3px solid #ffd166;">
+        <div class="card-title">🔒 bcrypt</div>
+        <p style="font-size:13px; color:var(--muted);"><strong style="color:#ffd166;">Lento por diseño</strong> (cost factor). Si roban la DB, tardaría años en fuerza bruta. Nunca texto plano.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 5. REGLAS DE NEGOCIO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">🔑 Reglas de Negocio del Service</div>
+        <div class="section-subtitle">La inteligencia del sistema — en task_service.py</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+<span class="cmt"># Regla 1: Verificar que el proyecto existe</span>
+project = self.project_repo.<span class="fn">get_project_by_id</span>(db, task.project_id)
+<span class="kw">if not</span> project:
+    <span class="kw">raise</span> HTTPException(<span class="num">404</span>, <span class="str">"Proyecto no encontrado"</span>)
+
+<span class="cmt"># Regla 2: Solo el dueño puede crear tareas en ese proyecto</span>
+<span class="kw">if</span> project.creator_id != creator_id:
+    <span class="kw">raise</span> HTTPException(<span class="num">403</span>, <span class="str">"No podés crear tareas en un proyecto que no te pertenece"</span>)
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card" style="border-left:3px solid #ff9999;">
+        <div class="card-title">404 — Not Found</div>
+        <p style="font-size:13px; color:var(--muted);">El <strong style="color:#ff9999;">recurso no existe</strong> en la base de datos.</p>
+      </div>
+      <div class="card" style="border-left:3px solid #ffd166;">
+        <div class="card-title">403 — Forbidden</div>
+        <p style="font-size:13px; color:var(--muted);">El recurso <strong style="color:#ffd166;">existe pero no tenés permiso</strong> para usarlo.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 6. FRONTEND -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <div class="section-title">🌐 Frontend — Next.js</div>
+        <div class="section-subtitle">Client Components · Route Guards · Rutas dinámicas</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left:3px solid #a99dff;">
+        <div class="card-title">¿Por qué "use client"?</div>
+        <p style="font-size:13px; color:var(--muted);">Los componentes usan <strong style="color:#a99dff;">useState</strong>, <strong style="color:#a99dff;">useEffect</strong> y acceden a <strong>localStorage</strong> / <strong>fetch</strong> del lado del cliente. Esas APIs <em>no existen en el servidor</em>.</p>
+      </div>
+      <div class="card" style="border-left:3px solid #00d4aa;">
+        <div class="card-title">Rutas dinámicas</div>
+        <p style="font-size:13px; color:var(--muted);">Los corchetes <code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">[id]</code> en el nombre de carpeta crean rutas dinámicas.<br><strong style="color:#00d4aa;">/project/[id]</strong> → /project/1, /project/42...</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">🛡️ Route Guard — Protección de páginas privadas</div>
+      <div class="code-block">
+<span class="fn">useEffect</span>(() => {
+  <span class="kw">const</span> token = localStorage.<span class="fn">getItem</span>(<span class="str">"token"</span>);
+  <span class="kw">if</span> (!token) {
+    router.<span class="fn">push</span>(<span class="str">"/login"</span>);  <span class="cmt">// Sin token → redirigir al login</span>
+    <span class="kw">return</span>;
+  }
+  <span class="fn">fetchData</span>();  <span class="cmt">// Con token → cargar los datos</span>
+}, []);
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 7. DOCKER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div>
+        <div class="section-title">🐳 Docker y Docker Compose</div>
+        <div class="section-subtitle">Reproducibilidad · Healthcheck · Multi-stage build</div>
+      </div>
+    </div>
+
+    <div class="arch-stack">
+      <div class="arch-layer db" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="arch-layer-title">🗄️ db (MariaDB)</div>
+          <p>Arranca primero · con healthcheck · inicializa en ~20s</p>
+        </div>
+        <span style="background:rgba(255,107,107,.15); border:1px solid rgba(255,107,107,.3); border-radius:6px; padding:4px 12px; font-size:12px; color:#ff9999;">Paso 1</span>
+      </div>
+      <div class="arch-arrow">⬇ depende de: db (condition: service_healthy)</div>
+      <div class="arch-layer backend" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="arch-layer-title">⚙️ backend (FastAPI)</div>
+          <p>Espera que MariaDB esté HEALTHY · luego conecta</p>
+        </div>
+        <span style="background:rgba(255,209,102,.15); border:1px solid rgba(255,209,102,.3); border-radius:6px; padding:4px 12px; font-size:12px; color:#ffd166;">Paso 2</span>
+      </div>
+      <div class="arch-arrow">⬇ depende de: backend</div>
+      <div class="arch-layer frontend" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="arch-layer-title">⚛️ frontend (Next.js)</div>
+          <p>Arranca último · UI disponible en localhost:3000</p>
+        </div>
+        <span style="background:rgba(0,212,170,.15); border:1px solid rgba(0,212,170,.3); border-radius:6px; padding:4px 12px; font-size:12px; color:#00d4aa;">Paso 3</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px; border-left:3px solid #ff9999;">
+      <div class="card-title">⚠️ Sin healthcheck → el backend crashea</div>
+      <p style="font-size:13px; color:var(--muted);"><code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">depends_on: db</code> solo espera que el <strong>contenedor</strong> arranque. MariaDB tarda ~20s en inicializar sus archivos internos. Con <strong style="color:#00d4aa;">condition: service_healthy</strong>, el backend espera el test de salud real.</p>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card">
+        <div class="card-title">Backend Dockerfile</div>
+        <div class="code-block" style="margin-top:8px; font-size:11px;">
+<span class="kw">FROM</span> python:<span class="num">3.11</span>-slim  <span class="cmt"># ~150MB</span>
+<span class="kw">WORKDIR</span> /app
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install -r requirements.txt
+<span class="kw">COPY</span> . .
+<span class="kw">CMD</span> [<span class="str">"uvicorn"</span>, <span class="str">"main:app"</span>, <span class="str">"--host"</span>, <span class="str">"0.0.0.0"</span>]
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Frontend Dockerfile (multi-stage)</div>
+        <div class="code-block" style="margin-top:8px; font-size:11px;">
+<span class="cmt"># Stage 1: compilar TypeScript</span>
+<span class="kw">FROM</span> node:<span class="num">20</span>-alpine <span class="kw">AS</span> builder
+<span class="kw">RUN</span> npm ci && npm run build
+
+<span class="cmt"># Stage 2: solo lo compilado</span>
+<span class="kw">FROM</span> node:<span class="num">20</span>-alpine <span class="kw">AS</span> runner
+<span class="kw">COPY</span> --from=builder /app/.next ./.next
+<span class="kw">CMD</span> [<span class="str">"npm"</span>, <span class="str">"start"</span>]
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 8. PYDANTIC -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div>
+        <div class="section-title">📝 Schemas Pydantic — Validación automática</div>
+        <div class="section-subtitle">Sin escribir una línea de validación manual</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+<span class="kw">class</span> <span class="fn">TaskCreate</span>(BaseModel):
+    title: <span class="fn">str</span>                          <span class="cmt"># Obligatorio</span>
+    description: <span class="fn">str</span> | <span class="kw">None</span> = <span class="kw">None</span>      <span class="cmt"># Opcional</span>
+    project_id: <span class="fn">int</span>                      <span class="cmt"># Obligatorio</span>
+    assignee_id: <span class="fn">int</span> | <span class="kw">None</span> = <span class="kw">None</span>      <span class="cmt"># Opcional (puede ser null)</span>
+    status: <span class="fn">str</span> = <span class="str">"pending"</span>               <span class="cmt"># Opcional, con default</span>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card" style="border-left:3px solid #00d4aa;">
+        <div class="card-title">Pydantic convierte automáticamente</div>
+        <p style="font-size:13px; color:var(--muted);"><code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">title: 123</code> (número) → lo convierte a <strong style="color:#00d4aa;">"123"</strong> (string).</p>
+      </div>
+      <div class="card" style="border-left:3px solid #ff9999;">
+        <div class="card-title">Error 422 automático</div>
+        <p style="font-size:13px; color:var(--muted);"><code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 6px; border-radius:4px;">project_id: "hola"</code> → devuelve <strong style="color:#ff9999;">HTTP 422</strong> sin una línea de código.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">💡 from_attributes = True</div>
+      <p style="font-size:13px; color:var(--muted);">Permite que Pydantic lea atributos de objetos <strong>SQLAlchemy</strong> (que son clases Python, no diccionarios) para serializar las respuestas.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 9. SQLALCHEMY -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div>
+        <div class="section-title">🔄 ORM — SQLAlchemy</div>
+        <div class="section-subtitle">Python en vez de SQL crudo · Seguridad · Portabilidad</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left:3px solid #ff6b6b;">
+        <div class="card-title">❌ Sin ORM (SQL crudo)</div>
+        <div class="code-block" style="margin-top:8px; font-size:12px;">
+cursor.<span class="fn">execute</span>(
+  <span class="str">"SELECT * FROM tasks WHERE project_id = %s"</span>,
+  (project_id,)
+)
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid #00d4aa;">
+        <div class="card-title">✅ Con SQLAlchemy ORM</div>
+        <div class="code-block" style="margin-top:8px; font-size:12px;">
+db.<span class="fn">query</span>(models.Task)
+  .<span class="fn">filter</span>(models.Task.project_id == project_id)
+  .<span class="fn">all</span>()
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">Ventajas del ORM</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:#00d4aa; font-size:16px;">🛡️</span>
+          <div><strong style="font-size:14px; color:#fff;">Seguridad</strong> <span style="font-size:13px; color:var(--muted);">— Previene SQL Injection automáticamente (los valores se escapan)</span></div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:#a99dff; font-size:16px;">🔄</span>
+          <div><strong style="font-size:14px; color:#fff;">Portabilidad</strong> <span style="font-size:13px; color:var(--muted);">— El mismo código funciona con MySQL, PostgreSQL, SQLite</span></div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start;">
+          <span style="color:#ffd166; font-size:16px;">🔗</span>
+          <div><strong style="font-size:14px; color:#fff;">Relaciones</strong> <span style="font-size:13px; color:var(--muted);">— Las FK se manejan como atributos Python: <code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 5px; border-radius:4px;">project.tasks</code>, <code style="font-size:11px; background:rgba(255,255,255,.06); padding:2px 5px; border-radius:4px;">task.comments</code></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 10. FLUJO COMPLETO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div>
+        <div class="section-title">🧪 Flujo Completo: Crear una Tarea</div>
+        <div class="section-subtitle">La request de punta a punta — Frontend → Controller → Service → Repo → DB → Respuesta</div>
+      </div>
+    </div>
+
+    <div class="flow-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>🖥️ Frontend — Usuario llena el form</strong>
+          <p>Completa título, descripción, proyecto, asignado. Hace click en "Crear".</p>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>📡 Frontend — HTTP POST con token</strong>
+          <p><code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">POST http://localhost:8000/tasks/</code> · Headers: <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">Authorization: Bearer eyJ...</code> · Body: JSON con los campos</p>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>🎛️ task_controller.py — Recibe la request</strong>
+          <p>Valida el JWT → extrae <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">current_user_id</code> · Valida el body con <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">TaskCreate</code> schema · Llama al service</p>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <strong>🧠 task_service.py — Aplica reglas de negocio</strong>
+          <p>¿Existe el proyecto? (404 si no) · ¿El proyecto pertenece al usuario? (403 si no) · Llama al repository</p>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <strong>🗄️ task_repository.py — Persiste en la DB</strong>
+          <p>Crea el objeto <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">Task()</code> · <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">db.add()</code> → <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">db.commit()</code> → <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">db.refresh()</code> → retorna el objeto</p>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-card">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <strong>📤 La respuesta sube por las capas</strong>
+          <p>repo → service → controller · Se serializa con <code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">TaskResponse</code> schema · Retorna JSON con los datos completos</p>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-card">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <strong>✅ Frontend actualiza la UI sin recargar</strong>
+          <p><code style="font-size:11px; background:rgba(255,255,255,.05); padding:2px 6px; border-radius:4px;">setTasks([...tasks, newTask])</code> → React re-renderiza. La tarea aparece instantáneamente.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 11. QA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <div>
+        <div class="section-title">🚨 Preguntas Frecuentes — Con Respuestas</div>
+        <div class="section-subtitle">Las preguntas más comunes y cómo responderlas</div>
+      </div>
+    </div>
+
+    <div class="qa-list">
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Por qué FastAPI y no Django o Flask?</div>
+        <div class="qa-answer">FastAPI es <strong>moderno, asíncrono</strong> y tiene validación automática con Pydantic integrada. Genera <strong>documentación Swagger</strong> en <code>/docs</code> automáticamente. Flask requiere más configuración manual. Django es monolítico y difícil de separar en capas.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Por qué MariaDB y no PostgreSQL o MongoDB?</div>
+        <div class="qa-answer">El modelo tiene <strong>relaciones claras y bien definidas</strong> → base de datos relacional es la elección natural. MariaDB es compatible con MySQL, liviana, perfecto para Docker. PostgreSQL también hubiera sido válido.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Qué es la arquitectura en capas y por qué la usaste?</div>
+        <div class="qa-answer">Patrón donde <strong>cada capa tiene una responsabilidad única</strong>: controller → HTTP, service → reglas, repository → datos. Si mañana cambio de SQL a NoSQL, solo toco el repository. El resto del código no se entera.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Qué es un JWT y cómo funciona?</div>
+        <div class="qa-answer">Token firmado en <strong>3 partes: header · payload · signature</strong>. El payload tiene el user ID ("sub"). La firma usa el SECRET_KEY. El cliente lo guarda y lo envía en cada request. El servidor lo decodifica y verifica la firma <strong>sin consultar la DB</strong>.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Por qué guardás el token en localStorage?</div>
+        <div class="qa-answer">Para un challenge de alcance acotado es práctico. En producción real lo ideal son <strong>httpOnly cookies</strong> (no accesibles desde JS, protección contra XSS). Para evaluación, localStorage simplifica el flujo y cumple el requisito.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Qué es el healthcheck en Docker?</div>
+        <div class="qa-answer"><code>depends_on</code> solo garantiza que el <strong>contenedor</strong> arrancó, no que MariaDB esté lista. La DB tarda ~20s en inicializar. Sin healthcheck, el backend crashea. Con <strong>condition: service_healthy</strong>, espera a que MariaDB pase su propio test.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Qué mejorarías si tuvieras más tiempo?</div>
+        <div class="qa-answer"><strong>1)</strong> httpOnly cookies + refresh tokens · <strong>2)</strong> Tests unitarios con pytest · <strong>3)</strong> Separar configs dev/prod · <strong>4)</strong> Paginación en listados · <strong>5)</strong> Endpoint PATCH para editar status de tarea desde la UI.</div>
+      </div>
+      <div class="qa-card">
+        <div class="qa-question">❓ ¿Cómo escalarías esto?</div>
+        <div class="qa-answer">La arquitectura stateless facilita escalar horizontalmente: múltiples instancias del backend porque el estado está en la DB. Para tiempo real, agregaría WebSockets en un nuevo controller <strong>sin tocar el resto</strong>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 12. ARCHIVOS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <div>
+        <div class="section-title">🗂️ Estructura de Archivos</div>
+        <div class="section-subtitle">Mapa del proyecto completo</div>
+      </div>
+    </div>
+
+    <div class="tree">
+<span class="dir">codemized-challenge/</span>
+├── <span class="highlight">.env</span>                      <span class="comment">← Variables de entorno (DB + JWT_SECRET_KEY)</span>
+├── <span class="highlight">docker-compose.yml</span>        <span class="comment">← Orquestación de los 3 servicios</span>
+│
+├── <span class="dir">backend/</span>
+│   ├── <span class="highlight">main.py</span>               <span class="comment">← App FastAPI, middlewares CORS, routers</span>
+│   ├── <span class="highlight">models.py</span>             <span class="comment">← Tablas de la DB (clases SQLAlchemy)</span>
+│   ├── <span class="highlight">schemas.py</span>            <span class="comment">← Validación I/O (Pydantic)</span>
+│   ├── <span class="highlight">database.py</span>           <span class="comment">← Conexión y sesión a MariaDB</span>
+│   ├── <span class="highlight">auth.py</span>               <span class="comment">← JWT: crear/verificar tokens + bcrypt</span>
+│   ├── <span class="highlight">requirements.txt</span>      <span class="comment">← Dependencias Python</span>
+│   ├── <span class="file">Dockerfile</span>
+│   ├── <span class="dir">controllers/</span>          <span class="comment">← Rutas HTTP (capa de entrada)</span>
+│   ├── <span class="dir">services/</span>             <span class="comment">← Lógica de negocio (cerebro)</span>
+│   └── <span class="dir">repositories/</span>         <span class="comment">← Consultas SQL (acceso a datos)</span>
+│
+└── <span class="dir">frontend/</span>
+    ├── <span class="file">Dockerfile</span>            <span class="comment">← Multi-stage build</span>
+    └── <span class="dir">app/</span>
+        ├── <span class="highlight">page.tsx</span>          <span class="comment">← Dashboard: lista proyectos del usuario</span>
+        ├── <span class="dir">login/</span><span class="highlight">page.tsx</span>   <span class="comment">← Login con JWT</span>
+        ├── <span class="dir">register/</span><span class="highlight">page.tsx</span> <span class="comment">← Registro de usuario</span>
+        ├── <span class="dir">project/[id]/</span><span class="highlight">page.tsx</span> <span class="comment">← Tareas del proyecto + crear tarea</span>
+        └── <span class="dir">task/[id]/</span><span class="highlight">page.tsx</span>  <span class="comment">← Comentarios de una tarea</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 13. TIPS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">13</div>
+      <div>
+        <div class="section-title">💡 Consejos para la Entrevista</div>
+        <div class="section-subtitle">Lo que diferencia a un trainee de un junior que impresiona</div>
+      </div>
+    </div>
+
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-num">01</div>
+        <strong>Siempre explicá el "por qué"</strong>
+        <p>No digas "usé FastAPI". Di "usé FastAPI <em>porque</em> tiene Pydantic integrado y genera Swagger automáticamente."</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">02</div>
+        <strong>Si no sabés, sé honesto</strong>
+        <p>"No tengo experiencia con X pero lo abordaría buscando en la documentación oficial, como hice con JWT."</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">03</div>
+        <strong>Hablá de tradeoffs</strong>
+        <p>Todo tiene ventajas y desventajas. Mostrá que pensás en eso: "localStorage es conveniente pero en prod usaría cookies httpOnly."</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">04</div>
+        <strong>Mencioná qué mejorarías</strong>
+        <p>Muestra madurez técnica que los trainee rara vez tienen. Enumerate mejoras concretas y realistas.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">05</div>
+        <strong>Anclá en el proyecto real</strong>
+        <p>Cada respuesta, anclarla en decisiones que tomaste: "En este proyecto, lo hice así porque..."</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">06</div>
+        <strong>Pausá y pensá</strong>
+        <p>No respondas apurado. Una pausa de 3 segundos demuestra reflexión, no ignorancia. Pensá antes de hablar.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="card-title">📚 Vocabulario clave a dominar</div>
+      <div class="vocab-grid">
+        <span class="vocab-tag">Arquitectura en capas</span>
+        <span class="vocab-tag">Single Responsibility</span>
+        <span class="vocab-tag">Stateless / Stateful</span>
+        <span class="vocab-tag">JWT / Bearer Token</span>
+        <span class="vocab-tag">OAuth2</span>
+        <span class="vocab-tag">ORM / Migration</span>
+        <span class="vocab-tag">Foreign Key / Cascade</span>
+        <span class="vocab-tag">Docker / Imagen / Volumen</span>
+        <span class="vocab-tag">REST / Endpoint</span>
+        <span class="vocab-tag">HTTP 200/201/401/403/404/422</span>
+        <span class="vocab-tag">Pydantic / Schema</span>
+        <span class="vocab-tag">bcrypt / Hash</span>
+        <span class="vocab-tag">Route Guard</span>
+        <span class="vocab-tag">Multi-stage build</span>
+        <span class="vocab-tag">Healthcheck</span>
+        <span class="vocab-tag">SQL Injection</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ FOOTER -->
+<div class="footer">
+  <strong>¡Mucho éxito! 🚀</strong><br>
+  Sabés el proyecto de punta a punta. Hablá con calma, explicá tus razonamientos y no tengas miedo de decir "lo pensé así porque...". Eso es exactamente lo que buscan en un junior.
+</div>
+
+</body>
+</html>
