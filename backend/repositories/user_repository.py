@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 import models
-import schemas
 
 class UserRepository:
     def get_user_by_id(self, db: Session, user_id: int):
@@ -15,3 +14,6 @@ class UserRepository:
         db.commit()
         db.refresh(db_user)
         return db_user
+
+    def get_all_users(self, db: Session):
+        return db.query(models.User).all()

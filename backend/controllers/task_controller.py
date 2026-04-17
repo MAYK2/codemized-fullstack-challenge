@@ -24,3 +24,13 @@ def get_project_tasks(
     current_user_id: int = Depends(get_current_user_id)
 ):
     return task_service.get_tasks_by_project(db, project_id)
+
+@router.patch("/{task_id}/assign", response_model=schemas.TaskResponse)
+def assign_task(
+    task_id: int,
+    body: schemas.TaskAssign,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """Asigna (o re-asigna) una tarea a un usuario específico."""
+    return task_service.assign_task(db, task_id, body.assignee_id, current_user_id)

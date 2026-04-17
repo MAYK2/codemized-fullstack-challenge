@@ -20,3 +20,6 @@ class UserService:
         if not user:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         return user
+
+    def get_all_users(self, db: Session):
+        return self.user_repo.get_all_users(db)

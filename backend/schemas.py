@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 # ==========================
 # SCHEMAS DE USUARIO
@@ -12,6 +13,13 @@ class UserCreate(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
+    alias: str
+    class Config:
+        from_attributes = True
+
+class UserPublic(BaseModel):
+    """Schema público: solo id y alias, sin datos sensibles. Usado para listar usuarios asignables."""
+    id: int
     alias: str
     class Config:
         from_attributes = True
@@ -45,12 +53,17 @@ class TaskCreate(BaseModel):
     assignee_id: int | None = None
     status: str = "pending"
 
+class TaskAssign(BaseModel):
+    """Schema para el endpoint PATCH /tasks/{id}/assign."""
+    assignee_id: int
+
 class TaskResponse(BaseModel):
     id: int
     title: str
     description: str | None
     project_id: int
     assignee_id: int | None
+    assignee: Optional[UserPublic] = None
     status: str
 
     class Config:

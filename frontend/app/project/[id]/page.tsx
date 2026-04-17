@@ -6,6 +6,7 @@ import Link from "next/link";
 
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 const TaskIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>;
+const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string; dot: string }> = {
   pending:     { label: "Pendiente",   classes: "bg-amber-500/10 text-amber-400 border-amber-500/20",       dot: "bg-amber-400 animate-pulse" },
@@ -13,12 +14,27 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string; dot: strin
   done:        { label: "Completada",  classes: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", dot: "bg-emerald-400" },
 };
 
+interface User {
+  id: number;
+  alias: string;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  description: string | null;
+  status: string;
+  assignee_id: number | null;
+  assignee: User | null;
+}
+
 export default function ProjectTasksPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
   const projectId = params.id;
   const router = useRouter();
 
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
@@ -26,30 +42,34 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/tasks/project/${projectId}`, {
-          credentials: "include", // envía la httpOnly cookie automáticamente
-          cache: "no-store",
-        });
+        // Cargar tareas y lista de usuarios en paralelo
+        const [resTasks, resUsers] = await Promise.all([
+          fetch(`http://localhost:8000/tasks/project/${projectId}`, {
+            credentials: "include",
+            cache: "no-store",
+          }),
+          fetch("http://localhost:8000/users/", {
+            credentials: "include",
+          }),
+        ]);
 
-        if (response.status === 401) {
+        if (resTasks.status === 401 || resUsers.status === 401) {
           router.push("/login");
           return;
         }
 
-        if (response.ok) {
-          const data = await response.json();
-          setTasks(data);
-        }
+        if (resTasks.ok) setTasks(await resTasks.json());
+        if (resUsers.ok) setUsers(await resUsers.json());
       } catch (error) {
-        console.error("Error al cargar tareas:", error);
+        console.error("Error al cargar datos:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTasks();
+    fetchData();
   }, [projectId, router]);
 
   const handleCreateTask = async (e: React.FormEvent) => {
@@ -79,11 +99,10 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
         setStatus("pending");
       } else {
         const errorData = await response.json();
-        alert(errorData.detail || "Error al crear la tarea. Verifica tus permisos.");
+        alert(errorData.detail || "Error al crear la tarea.");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error de conexión al intentar crear la tarea.");
     }
   };
 
@@ -108,9 +127,8 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
 
           <div className="bg-slate-900/50 backdrop-blur-xl p-6 rounded-2xl border border-slate-700/50 shadow-lg flex items-center justify-between">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 flex items-center gap-3">
-                Tareas del Proyecto
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-100">Tareas del Proyecto</h1>
+              <p className="text-slate-500 text-sm mt-1">{tasks.length} tarea{tasks.length !== 1 ? "s" : ""} · {users.length} usuario{users.length !== 1 ? "s" : ""} en el sistema</p>
             </div>
           </div>
         </div>
@@ -136,29 +154,37 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
               />
               <input
                 type="text"
-                placeholder="Añade más detalles..."
+                placeholder="Descripción (opcional)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="flex-[2] p-3.5 bg-slate-950/50 border border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 placeholder-slate-500 transition-all"
               />
             </div>
             <div className="flex flex-col md:flex-row gap-4">
-              <input
-                type="number"
-                placeholder="ID de usuario (vacío = yo mismo)"
+              {/* DROPDOWN DE USUARIOS — reemplaza el input numérico */}
+              <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full md:w-52 p-3.5 bg-slate-950/50 border border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 placeholder-slate-500 transition-all"
-              />
+                className="w-full md:w-64 p-3.5 bg-slate-950/70 border border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 transition-all cursor-pointer"
+              >
+                <option value="">👤 Asignar a... (yo mismo por defecto)</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.alias} (ID: {u.id})
+                  </option>
+                ))}
+              </select>
+
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full md:w-52 p-3.5 bg-slate-950/70 border border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 transition-all cursor-pointer"
+                className="w-full md:w-48 p-3.5 bg-slate-950/70 border border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 transition-all cursor-pointer"
               >
-                <option value="pending">Pendiente</option>
-                <option value="in_progress">En progreso</option>
-                <option value="done">Completada</option>
+                <option value="pending">⏳ Pendiente</option>
+                <option value="in_progress">🔄 En progreso</option>
+                <option value="done">✅ Completada</option>
               </select>
+
               <button
                 type="submit"
                 className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg shadow-cyan-500/25 active:scale-[0.98] whitespace-nowrap"
@@ -178,7 +204,7 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
             </div>
           ) : (
             <div className="space-y-3">
-              {tasks.map((task: any) => {
+              {tasks.map((task) => {
                 const statusInfo = STATUS_CONFIG[task.status] ?? STATUS_CONFIG["pending"];
                 return (
                   <Link href={`/task/${task.id}`} key={task.id} className="block group">
@@ -191,7 +217,19 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
                         </div>
                         <div>
                           <h3 className="font-bold text-lg text-slate-100 group-hover:text-cyan-300 transition-colors">{task.title}</h3>
-                          <p className="text-slate-400 text-sm mt-0.5 max-w-2xl truncate">{task.description}</p>
+                          {task.description && (
+                            <p className="text-slate-400 text-sm mt-0.5 max-w-2xl truncate">{task.description}</p>
+                          )}
+                          {/* Asignado — ahora muestra el alias real */}
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <UserIcon />
+                            <span className="text-xs text-slate-500">
+                              {task.assignee
+                                ? <span className="text-cyan-400/80 font-medium">{task.assignee.alias}</span>
+                                : <span className="text-slate-600">Sin asignar</span>
+                              }
+                            </span>
+                          </div>
                         </div>
                       </div>
 
