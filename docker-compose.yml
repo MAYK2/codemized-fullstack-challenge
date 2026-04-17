@@ -4,15 +4,18 @@ services:
     image: mariadb:10.11
     container_name: codemized_db
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: task_manager_db
-      MYSQL_USER: dev_user
-      MYSQL_PASSWORD: dev_password
-    ports:
-      - "3306:3306"
+    env_file: 
+      - .env
+    networks:
+      - app_network
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # 2. EL BACKEND (FastAPI)
   backend:
@@ -21,9 +24,12 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-    environment:
-      DATABASE_URL: mysql+pymysql://dev_user:dev_password@db:3306/task_manager_db
+      db:
+        condition: service_healthy
+    env_file: 
+      - .env
+    networks:
+      - app_network
 
   # 3. EL FRONTEND (Next.js)
   frontend:
@@ -33,7 +39,14 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - app_network
 
-# ESTO ES LO QUE LE FALTABA A DOCKER:
+# Definimos la red explícitamente
+networks:
+  app_network:
+    driver: bridge
+
+# Definimos el volumen
 volumes:
-  db_data:
+  db_data:

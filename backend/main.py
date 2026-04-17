@@ -3,7 +3,6 @@ from database import engine
 import models
 from fastapi.middleware.cors import CORSMiddleware
 
-# Ahora el main ve la carpeta controllers sin problema:
 from controllers import user_controller, project_controller, task_controller, auth_controller, comment_controller
 
 models.Base.metadata.create_all(bind=engine)
@@ -12,10 +11,10 @@ app = FastAPI(title="Codemized Task Manager API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], # Le damos permiso exclusivo a tu frontend
+    allow_origins=["http://localhost:3000", "http://100.83.82.124:3000", "http://169.254.83.107:3000"],
     allow_credentials=True,
-    allow_methods=["*"], # Permite POST, GET, PUT, DELETE
-    allow_headers=["*"], # Permite enviar Tokens JWT
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(user_controller.router)

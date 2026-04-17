@@ -4,19 +4,15 @@ from pydantic import BaseModel, EmailStr
 # SCHEMAS DE USUARIO
 # ==========================
 
-# 1. Lo que le exigimos al frontend cuando alguien se registra
 class UserCreate(BaseModel):
     email: EmailStr
     alias: str
     password: str
 
-# 2. Lo que le devolvemos al frontend (¡Sin la contraseña!)
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
     alias: str
-    # Esta configuración es clave: le permite a Pydantic leer los datos 
-    # directamente desde el modelo de base de datos de SQLAlchemy
     class Config:
         from_attributes = True
 
@@ -27,7 +23,7 @@ class UserResponse(BaseModel):
 
 class ProjectCreate(BaseModel):
     title: str
-    description: str | None = None # El None significa que es opcional
+    description: str | None = None
 
 class ProjectResponse(BaseModel):
     id: int
@@ -47,6 +43,7 @@ class TaskCreate(BaseModel):
     description: str | None = None
     project_id: int
     assignee_id: int | None = None
+    status: str = "pending"
 
 class TaskResponse(BaseModel):
     id: int
@@ -54,6 +51,7 @@ class TaskResponse(BaseModel):
     description: str | None
     project_id: int
     assignee_id: int | None
+    status: str
 
     class Config:
         from_attributes = True

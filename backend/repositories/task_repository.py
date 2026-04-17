@@ -3,12 +3,13 @@ import models
 import schemas
 
 class TaskRepository:
-    def create_task(self, db: Session, title: str, description: str, project_id: int, assignee_id: int = None):
+    def create_task(self, db: Session, title: str, description: str, project_id: int, assignee_id: int = None, status: str = "pending"):
         db_task = models.Task(
             title=title,
             description=description,
             project_id=project_id,
-            assignee_id=assignee_id
+            assignee_id=assignee_id,
+            status=status
         )
         db.add(db_task)
         db.commit()

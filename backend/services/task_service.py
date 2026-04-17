@@ -17,8 +17,7 @@ class TaskService:
         if project.creator_id != creator_id:
             raise HTTPException(status_code=403, detail="No podés crear tareas en un proyecto que no te pertenece")
 
-        assignee = task.assignee_id if task.assignee_id else creator_id
-        return self.task_repo.create_task(db, title=task.title, description=task.description, project_id=task.project_id, assignee_id=assignee)
+        return self.task_repo.create_task(db, title=task.title, description=task.description, project_id=task.project_id, assignee_id=task.assignee_id, status=task.status)
 
     def get_tasks_by_project(self, db: Session, project_id: int):
         return self.task_repo.get_tasks_by_project(db, project_id)
