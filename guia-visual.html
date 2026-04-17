@@ -1191,6 +1191,351 @@ db.<span class="fn">query</span>(models.Task)
     </div>
   </div>
 
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════ 14. GLOSARIO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">14</div>
+      <div>
+        <div class="section-title">📚 Glosario — Definiciones en Tu Sistema</div>
+        <div class="section-subtitle">Qué significa cada término y dónde aparece exactamente en este proyecto</div>
+      </div>
+    </div>
+
+    <style>
+      .gloss-grid { display: flex; flex-direction: column; gap: 12px; }
+      .gloss-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 240px 1fr;
+      }
+      @media (max-width: 680px) { .gloss-card { grid-template-columns: 1fr; } }
+      .gloss-term {
+        padding: 18px 20px;
+        background: rgba(108,99,255,.07);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .gloss-term .term-name { font-weight: 700; font-size: 14px; color: #a99dff; line-height: 1.4; }
+      .term-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 4px;
+        width: fit-content;
+      }
+      .badge-back  { background: rgba(255,209,102,.15); color: #ffd166; border: 1px solid rgba(255,209,102,.3); }
+      .badge-front { background: rgba(0,212,170,.15);   color: #00d4aa; border: 1px solid rgba(0,212,170,.3); }
+      .badge-db    { background: rgba(255,107,107,.15); color: #ff9999; border: 1px solid rgba(255,107,107,.3); }
+      .badge-infra { background: rgba(108,99,255,.2);   color: #a99dff; border: 1px solid rgba(108,99,255,.4); }
+      .badge-seg   { background: rgba(255,150,50,.15);  color: #ffb347; border: 1px solid rgba(255,150,50,.3); }
+      .gloss-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+      .gloss-def { font-size: 13px; color: var(--muted); line-height: 1.75; }
+      .gloss-def strong { color: var(--text); }
+      .gloss-in-system {
+        font-size: 11.5px;
+        background: rgba(255,255,255,.03);
+        border: 1px solid var(--border);
+        border-left: 3px solid #6c63ff;
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: #8892a4;
+        font-family: 'JetBrains Mono', monospace;
+        line-height: 1.8;
+      }
+      .sys-label {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: #6c63ff;
+        margin-bottom: 6px;
+      }
+    </style>
+
+    <div class="gloss-grid">
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Arquitectura en capas</span>
+          <span class="term-badge badge-back">Backend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Patrón que divide el sistema en <strong>capas con una sola responsabilidad cada una</strong>. Si algo cambia (la DB, el protocolo HTTP, las reglas del negocio), solo tocás una capa. El resto no se entera.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            controllers/ → recibe la HTTP request y delega<br>
+            services/    → aplica las reglas de negocio<br>
+            repositories/ → ejecuta queries en MariaDB
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Single Responsibility</span>
+          <span class="term-badge badge-back">Backend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Principio SOLID: <strong>cada clase tiene una sola razón para cambiar</strong>. Si una clase mezcla HTTP + lógica + DB, cualquier cambio puede romper cosas no relacionadas.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            task_controller.py → solo rutas HTTP, nada más<br>
+            task_service.py    → solo reglas de negocio<br>
+            task_repository.py → solo consultas a la DB
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Stateless / Stateful</span>
+          <span class="term-badge badge-back">Backend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>Stateless</strong>: el servidor no recuerda nada entre requests. Cada una lleva todo lo necesario para ser procesada. Ideal para escalar horizontalmente. <strong>Stateful</strong>: el servidor mantiene sesiones en memoria (lo opuesto).</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            Tu FastAPI es STATELESS: verifica el JWT de la cookie<br>
+            en cada request, sin tablas de sesiones en la DB.<br>
+            El "estado" vive en el token, no en el servidor.
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">JWT / Bearer Token</span>
+          <span class="term-badge badge-seg">Seguridad</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>JWT</strong> (JSON Web Token): token firmado de 3 partes — header (algoritmo), payload (datos: user ID + expiración), signature (firmado con SECRET_KEY). <strong>Bearer</strong> = "quien lo porta tiene permiso". El servidor lo verifica sin consultar la DB.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            auth.py → create_access_token({"sub": str(user.id)})<br>
+            auth.py → get_current_user_id() lee la httpOnly cookie<br>
+            El frontend envía la cookie automáticamente (credentials:"include")
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">OAuth2</span>
+          <span class="term-badge badge-seg">Seguridad</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Estándar de autorización que define <strong>distintos flujos para obtener tokens de acceso</strong>. FastAPI integra el flujo "Password" por conveniencia: el cliente envía usuario + contraseña como form-data.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            POST /login recibe form-data (username, password)<br>
+            FastAPI usa OAuth2PasswordRequestForm para parsearlo<br>
+            Sigue el estándar OAuth2 Resource Owner Password Flow
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">ORM / Migration</span>
+          <span class="term-badge badge-db">Base de datos</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>ORM</strong> (Object-Relational Mapper): traduce clases Python en tablas SQL y viceversa. Escribís Python puro, el ORM genera el SQL. <strong>Migration</strong>: script versionado que aplica o revierte cambios al esquema.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            models.py → class Task(Base) define columnas en Python<br>
+            SQLAlchemy ORM genera el SQL correspondiente<br>
+            Base.metadata.create_all() crea las tablas al iniciar
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Foreign Key / Cascade</span>
+          <span class="term-badge badge-db">Base de datos</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>Foreign Key</strong>: columna que referencia el ID de otra tabla, estableciendo una relación entre entidades. <strong>Cascade</strong>: efecto en cadena — si se elimina el registro padre, se eliminan automáticamente sus hijos.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            tasks.project_id  → FK a projects.id (obligatoria)<br>
+            tasks.assignee_id → FK a users.id (opcional / nullable)<br>
+            Borrar un proyecto → sus tareas se borran en cascada<br>
+            Borrar una tarea   → sus comentarios se borran en cascada
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Docker / Imagen / Volumen</span>
+          <span class="term-badge badge-infra">Infraestructura</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>Imagen</strong>: plantilla inmutable con todo el entorno. <strong>Contenedor</strong>: instancia en ejecución de una imagen. <strong>Volumen</strong>: almacenamiento persistente externo al contenedor — los datos sobreviven aunque el contenedor se destruya.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            backend/Dockerfile  → imagen Python 3.11-slim + FastAPI<br>
+            frontend/Dockerfile → imagen Node 20-alpine (multi-stage)<br>
+            docker-compose.yml  → volumen db_data persiste MariaDB<br>
+            sin él, los datos se pierden al hacer docker compose down
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">REST / Endpoint</span>
+          <span class="term-badge badge-back">Backend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>REST</strong>: estilo donde los recursos se identifican por URL y se manipulan con verbos HTTP (GET leer, POST crear, PUT/PATCH actualizar, DELETE eliminar). <strong>Endpoint</strong>: combinación verbo + ruta que expone una operación.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            GET  /projects/my-projects → listar mis proyectos<br>
+            POST /tasks/               → crear nueva tarea<br>
+            GET  /comments/task/{id}   → comentarios de una tarea<br>
+            POST /login · POST /logout → autenticarse / cerrar sesión
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">HTTP 200 / 201 / 401 / 403 / 404 / 422</span>
+          <span class="term-badge badge-back">Backend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Códigos que el servidor envía para indicar el resultado. <strong>2xx = éxito</strong>. <strong>4xx = error del cliente</strong>. Saber cuál usar en cada situación es señal de buena práctica REST.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            200 OK          → GET exitoso (listar proyectos/tareas)<br>
+            201 Created     → POST exitoso (nueva tarea o proyecto)<br>
+            401 Unauthorized → cookie ausente o JWT inválido/expirado<br>
+            403 Forbidden    → autenticado pero sin permiso (no es dueño)<br>
+            404 Not Found    → proyecto o tarea no existe en la DB<br>
+            422 Unprocessable → body inválido (Pydantic lo dispara solo)
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Pydantic / Schema</span>
+          <span class="term-badge badge-back">Backend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>Pydantic</strong>: librería Python que valida datos usando type hints. <strong>Schema</strong>: clase que define la forma esperada de los datos de entrada (request body) o salida (response). Si el dato no cumple → HTTP 422 automático.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            schemas.py → TaskCreate: title(str), project_id(int)...<br>
+            Si enviás project_id:"abc" → HTTP 422 sin código extra<br>
+            TaskResponse define exactamente qué devuelve la API<br>
+            UserResponse excluye hashed_password de la respuesta
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">bcrypt / Hash</span>
+          <span class="term-badge badge-seg">Seguridad</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def"><strong>Hash</strong>: función de una sola vía — convierte texto en una cadena fija irreversible. No se puede "deshacer". <strong>bcrypt</strong>: algoritmo de hashing con cost factor configurable, diseñado para ser lento y resistir fuerza bruta.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            auth.py → get_password_hash(password) al registrarse<br>
+            auth.py → verify_password(plain, hashed) al hacer login<br>
+            users.hashed_password NUNCA guarda texto plano en la DB
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Route Guard</span>
+          <span class="term-badge badge-front">Frontend</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Mecanismo de protección de rutas del lado del cliente. Antes de renderizar una página privada, verifica si el usuario está autenticado. Si no lo está, redirige inmediatamente al login.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema</span>
+            En page.tsx, /project/[id] y /task/[id]:<br>
+            fetch("http://localhost:8000/users/me", {credentials:"include"})<br>
+            si status === 401 → router.push("/login")<br>
+            La httpOnly cookie es el "pase" — el navegador la envía sola
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Multi-stage build</span>
+          <span class="term-badge badge-infra">Infraestructura</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Técnica de Dockerfile que usa <strong>múltiples etapas</strong>: una para compilar con todas las herramientas de desarrollo, y otra final solo con el artefacto compilado. La imagen de producción es mucho más pequeña y no expone el código fuente.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema — frontend/Dockerfile</span>
+            FROM node:20-alpine AS builder<br>
+            RUN npm ci && npm run build   ← compila TypeScript<br>
+            FROM node:20-alpine AS runner<br>
+            COPY --from=builder /app/.next ./.next  ← solo lo compilado
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">Healthcheck</span>
+          <span class="term-badge badge-infra">Infraestructura</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Test periódico que Docker ejecuta para saber si el servicio interno está <strong>realmente operativo</strong>, no solo si el proceso existe. Permite que otros servicios esperen confirmación de que el vecino está listo antes de arrancar.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema — docker-compose.yml</span>
+            db → healthcheck: mysqladmin ping -h localhost<br>
+            backend → depends_on: db (condition: service_healthy)<br>
+            sin esto el backend tira "Connection refused" porque<br>
+            MariaDB tarda ~20s en inicializar sus archivos internos
+          </div>
+        </div>
+      </div>
+
+      <div class="gloss-card">
+        <div class="gloss-term">
+          <span class="term-name">SQL Injection</span>
+          <span class="term-badge badge-seg">Seguridad</span>
+        </div>
+        <div class="gloss-body">
+          <p class="gloss-def">Ataque donde el usuario envía <strong>código SQL malicioso como input</strong> para manipular consultas. Si el servidor concatena el input directamente al SQL, el atacante puede leer, modificar o destruir datos de toda la base de datos.</p>
+          <div class="gloss-in-system">
+            <span class="sys-label">📍 En tu sistema — ¿Estás protegido? ✅ SÍ</span>
+            SQLAlchemy ORM usa parámetros enlazados (bind params)<br>
+            db.query(Task).filter(Task.id == task_id) es seguro<br>
+            Los valores nunca se concatenan como strings al SQL<br>
+            El ORM los escapa automáticamente antes de ejecutar
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══════════════════════════════════════════ FOOTER -->
