@@ -145,7 +145,7 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
             <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="number"
-                placeholder="ID Asignado (opcional)"
+                placeholder="ID de usuario (vacío = yo mismo)"
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 className="w-full md:w-52 p-3.5 bg-slate-950/50 border border-slate-700/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-100 placeholder-slate-500 transition-all"
