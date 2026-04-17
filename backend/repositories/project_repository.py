@@ -22,3 +22,10 @@ class ProjectRepository:
         
     def get_projects_by_user(self, db: Session, user_id: int, skip: int = 0, limit: int = 100):
         return db.query(models.Project).filter(models.Project.creator_id == user_id).offset(skip).limit(limit).all()
+
+    def delete_project(self, db: Session, project_id: int):
+        project = self.get_project_by_id(db, project_id)
+        if project:
+            db.delete(project)
+            db.commit()
+        return project

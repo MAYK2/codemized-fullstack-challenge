@@ -41,5 +41,16 @@ class TaskService:
 
         return self.task_repo.assign_task(db, task_id, assignee_id)
 
+    def delete_task(self, db: Session, task_id: int, current_user_id: int):
+        task = self.task_repo.get_task_by_id(db, task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+        project = self.project_repo.get_project_by_id(db, task.project_id)
+        if not project or project.creator_id != current_user_id:
+            raise HTTPException(status_code=403, detail="Solo el creador del proyecto puede eliminar tareas")
+
+        return self.task_repo.delete_task(db, task_id)
+
     def get_tasks_by_project(self, db: Session, project_id: int):
         return self.task_repo.get_tasks_by_project(db, project_id)

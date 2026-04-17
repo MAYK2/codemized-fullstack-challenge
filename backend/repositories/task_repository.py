@@ -29,3 +29,10 @@ class TaskRepository:
         db.commit()
         db.refresh(task)
         return task
+
+    def delete_task(self, db: Session, task_id: int):
+        task = self.get_task_by_id(db, task_id)
+        if task:
+            db.delete(task)
+            db.commit()
+        return task

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from typing import List
 import schemas
@@ -34,3 +34,13 @@ def assign_task(
 ):
     """Asigna (o re-asigna) una tarea a un usuario específico."""
     return task_service.assign_task(db, task_id, body.assignee_id, current_user_id)
+
+@router.delete("/{task_id}", status_code=204)
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    """Elimina una tarea y sus comentarios en cascada."""
+    task_service.delete_task(db, task_id, current_user_id)
+    return Response(status_code=204)

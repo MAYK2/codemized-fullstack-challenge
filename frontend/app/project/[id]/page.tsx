@@ -7,6 +7,7 @@ import Link from "next/link";
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 const TaskIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>;
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string; dot: string }> = {
   pending:     { label: "Pendiente",   classes: "bg-amber-500/10 text-amber-400 border-amber-500/20",       dot: "bg-amber-400 animate-pulse" },
@@ -103,6 +104,26 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
       }
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+  const handleDeleteTask = async (e: React.MouseEvent, taskId: number) => {
+    e.preventDefault();
+    if (!window.confirm("¿Estás seguro de que quieres eliminar esta tarea?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:8000/tasks/${taskId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok || response.status === 204) {
+        setTasks(tasks.filter((t) => t.id !== taskId));
+      } else {
+        const errorData = await response.json();
+        alert(errorData.detail || "Error al eliminar la tarea.");
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
     }
   };
 
@@ -238,9 +259,18 @@ export default function ProjectTasksPage({ params: paramsPromise }: { params: Pr
                           <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`}></span>
                           {statusInfo.label}
                         </span>
-                        <span className="text-cyan-400 text-sm font-semibold opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all flex items-center gap-1">
-                          Ver Detalles <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <button 
+                            onClick={(e) => handleDeleteTask(e, task.id)}
+                            className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors z-10"
+                            title="Eliminar tarea"
+                          >
+                            <TrashIcon />
+                          </button>
+                          <span className="text-cyan-400 text-sm font-semibold opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 transition-all flex items-center gap-1">
+                            Ver Detalles <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </Link>

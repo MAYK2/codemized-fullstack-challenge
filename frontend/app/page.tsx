@@ -7,6 +7,7 @@ import Link from "next/link";
 const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 const FolderIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>;
+const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
 
 export default function Home() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -80,6 +81,26 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error al crear:", error);
+    }
+  };
+  const handleDeleteProject = async (e: React.MouseEvent, projectId: number) => {
+    e.preventDefault(); // Evita que se navegue a la vista del proyecto
+    if (!window.confirm("¿Estás seguro de que quieres eliminar este proyecto y todas sus tareas?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:8000/projects/${projectId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok || response.status === 204) {
+        setProjects(projects.filter((p) => p.id !== projectId));
+      } else {
+        const errorData = await response.json();
+        alert(errorData.detail || "Error al eliminar el proyecto.");
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
     }
   };
 
@@ -174,10 +195,19 @@ export default function Home() {
                     
                     <div className="mt-6 pt-4 border-t border-slate-700/50 flex justify-between items-center relative">
                       <span className="text-xs font-mono px-2.5 py-1 bg-slate-800 rounded-md text-slate-500">ID: {project.id}</span>
-                      <span className="text-indigo-400 text-sm font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                        Ver Tareas
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                      </span>
+                      <div className="flex items-center gap-4">
+                        <button 
+                          onClick={(e) => handleDeleteProject(e, project.id)}
+                          className="text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors z-10"
+                          title="Eliminar proyecto"
+                        >
+                          <TrashIcon />
+                        </button>
+                        <span className="text-indigo-400 text-sm font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                          Ver Tareas
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>

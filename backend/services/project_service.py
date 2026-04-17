@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from repositories.project_repository import ProjectRepository
 import schemas
 
@@ -14,3 +15,11 @@ class ProjectService:
         
     def get_projects_by_user(self, db: Session, user_id: int):
         return self.project_repo.get_projects_by_user(db, user_id=user_id)
+
+    def delete_project(self, db: Session, project_id: int, user_id: int):
+        project = self.project_repo.get_project_by_id(db, project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+        if project.creator_id != user_id:
+            raise HTTPException(status_code=403, detail="Solo el creador puede eliminar este proyecto")
+        return self.project_repo.delete_project(db, project_id)
